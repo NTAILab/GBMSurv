@@ -10,7 +10,7 @@ To install `GBMSurv` in development mode after cloning the repository, follow th
 
 ```bash
 git clone https://github.com/NTAILab/GBMSurv.git
-cd GBMSurv
+cd gbmsurv
 pip install -e .
 ```
 
@@ -18,22 +18,28 @@ pip install -e .
 
 The repository is organized into several main directories:
 
-* **`NonParamGBMSurv/`**, **`LogNormGBMSurv/`**, **`WeibGBMSurv/`**
-  These folders contain implementations of three model variants:
+**`gbmsurv/`**
 
-  * **NonParamGBMSurv** – non-parametric model that estimates event probabilities within discrete time intervals.
-  * **LogNormGBMSurv** – parametric model based on the Log-Normal distribution.
-  * **WeibGBMSurv** – parametric model based on the Weibull distribution.
+The main package directory. It includes shared utilities and three sub-packages for different gradient boosting survival model variants:
 
-  Each folder includes the following submodules:
+* **`gbmsurv/log_norm_gbmsurv/`** – parametric model based on the **Log-Normal** distribution.
+* **`gbmsurv/weib_gbmsurv/`** – parametric model based on the **Weibull** distribution.
+* **`gbmsurv/non_param_gbmsurv/`** – non-parametric model that estimates event probabilities within discrete time intervals.
 
-  * **`model.py`** – defines the core gradient boosting survival model.
-  * **`loss.py`** – contains the loss function and its gradients/Hessians adapted for survival analysis.
-  * **`utils.py`** – utility functions for data preprocessing, metric calculations, and experimental setup.
+Each model subpackage contains the following modules:
 
-* **`examples/`**
-  Contains example notebooks that demonstrate how to train and evaluate the models on survival data.
+* **`model.py`** – defines the core gradient boosting survival model for that variant.
+* **`loss.py`** – implements the loss function and its gradient/Hessian logic, adapted for survival analysis.
+* **`__init__.py`** – imports the main model class for easy access.
 
+The root package also includes:
+
+* **`utils.py`** – shared utility functions for data preprocessing, metric computations, and experimental support.
+* **`__init__.py`** – aggregates all model variants for simplified import
+
+**`examples/`**
+
+Contains example notebooks demonstrating how to train and evaluate each survival model variant on survival data.
 
 ## Usage
 
@@ -52,9 +58,11 @@ To use the model for survival analysis, follow these steps:
 Here’s an example of using `GBMSurv` models for survival analysis:
 
 ```python
-from WeibGBMSurv.model import WeibGBMSurvivalModel
-from NonParamGBMSurv.model import GBMSurvivalModel
-from LogNormGBMSurv.model import LogNormGBMSurvivalModel
+from gbmsurv import (
+    WeibullGBMSurvModel,
+    LogNormGBMSurvModel,
+    NonParamGBMSurvModel,
+)
 
 from sksurv.datasets import load_veterans_lung_cancer
 from sklearn.model_selection import train_test_split

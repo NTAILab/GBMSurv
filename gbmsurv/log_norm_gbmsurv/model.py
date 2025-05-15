@@ -7,8 +7,6 @@ from scipy.stats import norm
 
 from sksurv.metrics import concordance_index_censored
 
-import warnings
-warnings.filterwarnings("ignore", category=FutureWarning)
 
 class LogNormGBMSurvivalModel:
 
@@ -78,7 +76,7 @@ class LogNormGBMSurvivalModel:
     _initial_preds : np.ndarray
         Initial predictions for (lambda, k), if provided.
     """
-     
+
     def __init__(
             self,
             learning_rate=0.1,
@@ -112,7 +110,6 @@ class LogNormGBMSurvivalModel:
         self.initial_params = initial_params
 
     def _prepare_target(self, y):
-        
         """Function for preparing data before training model
             y should have format (delta, time)"""
 
@@ -146,16 +143,17 @@ class LogNormGBMSurvivalModel:
             init_value_sigma = np.log(var / (mean ** 2) + 1) ** 0.5
             self._initial_preds = np.array([init_value_mu, init_value_sigma])
             initial_preds_train = np.tile(self._initial_preds, (len(X), 1))
-            d_train = xgb.DMatrix(X, label=target, enable_categorical=True, base_margin=initial_preds_train)
+            d_train = xgb.DMatrix(
+                X, label=target, enable_categorical=True, base_margin=initial_preds_train)
         else:
             d_train = xgb.DMatrix(X, label=target, enable_categorical=True)
-        
+
         time = target[:, 0].astype(np.float64)
         self._times = np.sort(np.unique(time))
 
         self._model = xgb.train(
             {
-                'tree_method': 'hist', 
+                'tree_method': 'hist',
                 'seed': self.random_seed,
                 'disable_default_eval_metric': 1,
                 'multi_strategy': "multi_output_tree",
@@ -182,12 +180,13 @@ class LogNormGBMSurvivalModel:
         )
 
         return self
-    
+
     def predict(self, X):
 
         if self.initial_params:
             initial_preds_test = np.tile(self._initial_preds, (len(X), 1))
-            d_test = xgb.DMatrix(X, enable_categorical=True, base_margin=initial_preds_test)
+            d_test = xgb.DMatrix(X, enable_categorical=True,
+                                 base_margin=initial_preds_test)
         else:
             d_test = xgb.DMatrix(X, enable_categorical=True)
 
@@ -230,7 +229,7 @@ class LogNormGBMSurvivalModel:
                         break
 
         return survs
-    
+
     def predict_survival_function(self, X):
 
         predicted_proba = self.predict(X)
@@ -244,9 +243,9 @@ class LogNormGBMSurvivalModel:
         step_functions = np.array([
             lambda x, sf=sf: self._step_function(x, sf) for sf in survival_functions
         ])
-        
+
         return step_functions
-    
+
     def score(self, X, y):
 
         delta_str = y.dtype.names[0]
@@ -254,7 +253,7 @@ class LogNormGBMSurvivalModel:
 
         delta = y[delta_str]
         time = y[time_str]
-        
+
         predicted_proba = self.predict(X)
 
         cumulative_proba = np.cumsum(predicted_proba, axis=1)
@@ -263,16 +262,18 @@ class LogNormGBMSurvivalModel:
 
         survival_function = 1 - cumulative_proba
 
-        integrated_сum_proba = np.array([trapezoid(survival_function[i], self._times) for i in range(survival_function.shape[0])])
+        integrated_сum_proba = np.array([trapezoid(
+            survival_function[i], self._times) for i in range(survival_function.shape[0])])
 
         try:
-            c_index = concordance_index_censored(delta.astype(bool), time, -integrated_сum_proba)
+            c_index = concordance_index_censored(
+                delta.astype(bool), time, -integrated_сum_proba)
         except Exception as e:
             print(f"Ошибка при вычислении C-index: {e}")
             c_index = [0]
 
         return c_index[0]
-    
+
     def get_params(self, deep=True):
         return {key: value for key, value in self.__dict__.items() if not key.startswith("_")}
 
