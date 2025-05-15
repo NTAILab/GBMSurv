@@ -10,7 +10,7 @@ To install `GBMSurv` in development mode after cloning the repository, follow th
 
 ```bash
 git clone https://github.com/NTAILab/GBMSurv.git
-cd gbmsurv
+cd GBMSurv
 pip install -e .
 ```
 

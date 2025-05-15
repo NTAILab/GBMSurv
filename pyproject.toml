@@ -22,5 +22,9 @@ dynamic = ["dependencies"]
 dependencies = { file = "requirements.txt" }
 readme = { file = "README.md" }
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["gbmsurv*"]
+
 [project.urls]
 "Homepage" = "https://github.com/ntailab/gbmsurv"
