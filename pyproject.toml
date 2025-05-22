@@ -27,4 +27,4 @@ where = ["."]
 include = ["gbmsurv*"]
 
 [project.urls]
-"Homepage" = "https://github.com/ntailab/gbmsurv"
+"Homepage" = "https://github.com/NTAILab/GBMSurv"
